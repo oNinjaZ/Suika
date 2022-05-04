@@ -9,7 +9,7 @@
 *.user
 *.userosscache
 *.sln.docstates
-*/.db
+*.db
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -454,3 +454,4 @@ $RECYCLE.BIN/
 !.vscode/launch.json
 !.vscode/extensions.json
 
+Suika.Api/suikaTest.db
