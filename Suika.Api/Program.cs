@@ -30,19 +30,14 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
     }
     var created = await userService.CreateAsync(user);
     if (!created)
-    {
-        return Results.BadRequest(new
+    {   
+        return Results.BadRequest(new List<ValidationFailure>
         {
-            errorMessage = "Username already exists"
+            new ("Username", "This username already exists")
         });
-        
-        // return Results.BadRequest(new List<ValidationFailure>
-        // {
-        //     new ("Username", "This username already exists")
-        // });
     }
 
-    return Results.Ok(user);
+    return Results.Created($"/users/{user.Username}", user);
 });
 
 if (app.Environment.IsDevelopment())
