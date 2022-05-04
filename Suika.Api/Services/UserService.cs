@@ -16,12 +16,12 @@ public class UserService : IUserService
     public async Task<bool> CreateAsync(User user)
     {
         var existingUser = await GetByUsernameAsync(user.Username);
-        if (existingUser is null) return false;
+        if (existingUser is not null) return false;
 
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             @"INSERT INTO Users(Username, Email, RegistrationDate)
-            VALUES (@Username, @Registration, @RegistrationDate)",
+            VALUES (@Username, @Email, @RegistrationDate)",
             user);
         return result > 0;
 
