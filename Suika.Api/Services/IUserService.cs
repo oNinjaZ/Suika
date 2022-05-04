@@ -4,9 +4,9 @@ namespace Suika.Api.Services;
 
 public interface IUserService
 {
-    public Task<bool> Create(User user);
-    public Task<bool> Update(User user);
-    public Task<bool> Delete(string username);
-    public Task<IEnumerable<User>> GetAll();
-    public Task<User?> GetByUsermame(string username);
+    public Task<bool> CreateAsync(User user);
+    public Task<bool> UpdateAsync(User user);
+    public Task<bool> DeleteAsync(string username);
+    public Task<IEnumerable<User>> GetAllAsync();
+    public Task<User?> GetByUsernameAsync(string username);
 }

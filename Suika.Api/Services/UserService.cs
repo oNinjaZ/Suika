@@ -13,32 +13,40 @@ public class UserService : IUserService
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<bool> Create(User user)
+    public async Task<bool> CreateAsync(User user)
     {
+        var existingUser = await GetByUsernameAsync(user.Username);
+        if (existingUser is null) return false;
+
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             @"INSERT INTO Users(Username, Email, RegistrationDate)
-            VALUES(@Username, @Registration, @RegistrationDate)", user);
+            VALUES (@Username, @Registration, @RegistrationDate)",
+            user);
         return result > 0;
 
     }
 
-    public Task<bool> Delete(string username)
+    public Task<bool> DeleteAsync(string username)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IEnumerable<User>> GetAll()
+    public Task<IEnumerable<User>> GetAllAsync()
     {
         throw new NotImplementedException();
     }
 
-    public Task<User?> GetByUsermame(string username)
+    public async Task<User?> GetByUsernameAsync(string username)
     {
-        throw new NotImplementedException();
+        var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryFirstOrDefaultAsync<User>(@"
+            SELECT * FROM Users
+            WHERE Username = @Username",
+            new {Username = username});
     }
 
-    public Task<bool> Update(User user)
+    public Task<bool> UpdateAsync(User user)
     {
         throw new NotImplementedException();
     }
