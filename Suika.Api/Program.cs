@@ -1,4 +1,5 @@
 using FluentValidation;
+using FluentValidation.Results;
 using Suika.Api.Data;
 using Suika.Api.Models;
 using Suika.Api.Services;
@@ -20,9 +21,28 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
-app.MapPost("/users", (User user, IUserService userService) =>
+app.MapPost("/users", async (User user, IUserService userService, IValidator<User> validator) =>
 {
-    userService.Create(user);
+    var validationResult = await validator.ValidateAsync(user);
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors);
+    }
+    var created = await userService.CreateAsync(user);
+    if (!created)
+    {
+        return Results.BadRequest(new
+        {
+            errorMessage = "Username already exists"
+        });
+        
+        // return Results.BadRequest(new List<ValidationFailure>
+        // {
+        //     new ("Username", "This username already exists")
+        // });
+    }
+
+    return Results.Ok(user);
 });
 
 if (app.Environment.IsDevelopment())
