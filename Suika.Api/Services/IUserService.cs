@@ -9,4 +9,5 @@ public interface IUserService
     public Task<bool> DeleteAsync(string username);
     public Task<IEnumerable<User>> GetAllAsync();
     public Task<User?> GetByUsernameAsync(string username);
+    public Task<IEnumerable<User>> SearchByUsernameAsync(string searchTerm);
 }

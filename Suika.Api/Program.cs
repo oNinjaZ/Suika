@@ -21,6 +21,23 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 
+app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
+{
+    if (searchTerm is not null && !string.IsNullOrWhiteSpace(searchTerm))
+    {
+        var matchedUsers = await userService.SearchByUsernameAsync(searchTerm);
+        return Results.Ok(matchedUsers);
+    }
+    var users = await userService.GetAllAsync();
+    return Results.Ok(users);
+});
+
+app.MapGet("/users/{username}", async (string username, IUserService userService) =>
+{
+    var user = await userService.GetByUsernameAsync(username);
+    return user is not null ? Results.Ok(user) : Results.NotFound();
+});
+
 app.MapPost("/users", async (User user, IUserService userService, IValidator<User> validator) =>
 {
     var validationResult = await validator.ValidateAsync(user);
@@ -30,7 +47,7 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
     }
     var created = await userService.CreateAsync(user);
     if (!created)
-    {   
+    {
         return Results.BadRequest(new List<ValidationFailure>
         {
             new ("Username", "This username already exists")
@@ -38,6 +55,25 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
     }
 
     return Results.Created($"/users/{user.Username}", user);
+});
+
+app.MapPut("/users/{username}", async (string username, User user, IUserService userService,
+    IValidator<User> validator) =>
+{
+    user.Username = username;
+    var validationResult = await validator.ValidateAsync(user);
+    if (!validationResult.IsValid)
+    {
+        return Results.BadRequest(validationResult.Errors);
+    }
+
+    var updated = await userService.UpdateAsync(user);
+    if (updated)
+    {
+        var updatedUser = await userService.GetByUsernameAsync(username);
+        return Results.Ok(user); // todo create DTO (user to dto)
+    }
+    return Results.NotFound();
 });
 
 if (app.Environment.IsDevelopment())

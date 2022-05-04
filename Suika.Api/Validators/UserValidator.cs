@@ -13,7 +13,5 @@ public class UserValidator : AbstractValidator<User>
 
         RuleFor(user => user.Email).NotEmpty();
         // todo - email regex
-
-        RuleFor(user => user.RegistrationDate).NotEmpty();
     }
 }

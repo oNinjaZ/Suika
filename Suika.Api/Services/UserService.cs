@@ -27,27 +27,51 @@ public class UserService : IUserService
 
     }
 
-    public Task<bool> DeleteAsync(string username)
+    public async Task<bool> DeleteAsync(string username)
     {
-        throw new NotImplementedException();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        var result = await connection.ExecuteAsync(
+            @"DELETE From Users
+            WHERE Username = @Username",
+            new { Username = username });
+        return result > 0;
+
     }
 
-    public Task<IEnumerable<User>> GetAllAsync()
+    public async Task<IEnumerable<User>> GetAllAsync()
     {
-        throw new NotImplementedException();
+        var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<User>(@"SELECT * FROM Users");
     }
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
         var connection = await _connectionFactory.CreateConnectionAsync();
-        return await connection.QueryFirstOrDefaultAsync<User>(@"
-            SELECT * FROM Users
+        return await connection.QuerySingleOrDefaultAsync<User>(
+            @"SELECT * FROM Users
             WHERE Username = @Username",
-            new {Username = username});
+            new { Username = username });
     }
 
-    public Task<bool> UpdateAsync(User user)
+    public async Task<IEnumerable<User>> SearchByUsernameAsync(string searchTerm)
     {
-        throw new NotImplementedException();
+        var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<User>(
+            @"SELECT * FROM Users
+            WHERE Username LIKE '%' || @SearchTerm || '%'",
+            new { SearchTerm = searchTerm }
+        );
+    }
+
+    public async Task<bool> UpdateAsync(User user)
+    {
+
+        var connection = await _connectionFactory.CreateConnectionAsync();
+        var result = await connection.ExecuteAsync(
+            @"UPDATE Users
+            SET Email = @Email
+            WHERE Username = @Username",
+            user);
+        return result > 0;
     }
 }
