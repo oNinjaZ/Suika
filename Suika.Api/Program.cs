@@ -1,6 +1,7 @@
 using FluentValidation;
 using FluentValidation.Results;
 using Suika.Api.Data;
+using Suika.Api.Extensions;
 using Suika.Api.Models;
 using Suika.Api.Services;
 
@@ -26,16 +27,18 @@ app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
     if (searchTerm is not null && !string.IsNullOrWhiteSpace(searchTerm))
     {
         var matchedUsers = await userService.SearchByUsernameAsync(searchTerm);
-        return Results.Ok(matchedUsers);
+        var matchedUsersAsDtos = matchedUsers.Select(user => user.AsDto());
+        return Results.Ok(matchedUsersAsDtos);
     }
     var users = await userService.GetAllAsync();
-    return Results.Ok(users);
+    var usersAsDtos = users.Select(user => user.AsDto());
+    return Results.Ok(usersAsDtos);
 });
 
 app.MapGet("/users/{username}", async (string username, IUserService userService) =>
 {
     var user = await userService.GetByUsernameAsync(username);
-    return user is not null ? Results.Ok(user) : Results.NotFound();
+    return user is not null ? Results.Ok(user.AsDto()) : Results.NotFound();
 });
 
 app.MapPost("/users", async (User user, IUserService userService, IValidator<User> validator) =>
@@ -54,7 +57,7 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
         });
     }
 
-    return Results.Created($"/users/{user.Username}", user);
+    return Results.Created($"/users/{user.Username}", user.AsDto());
 });
 
 app.MapPut("/users/{username}", async (string username, User user, IUserService userService,
@@ -66,14 +69,9 @@ app.MapPut("/users/{username}", async (string username, User user, IUserService 
     {
         return Results.BadRequest(validationResult.Errors);
     }
-
     var updated = await userService.UpdateAsync(user);
-    if (updated)
-    {
-        var updatedUser = await userService.GetByUsernameAsync(username);
-        return Results.Ok(user); // todo create DTO (user to dto)
-    }
-    return Results.NotFound();
+    return (updated) ? Results.NoContent() : Results.NotFound();
+
 });
 
 if (app.Environment.IsDevelopment())
