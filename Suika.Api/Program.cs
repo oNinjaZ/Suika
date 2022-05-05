@@ -10,7 +10,7 @@ using Suika.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
+//builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
 
 builder.Services.AddAuthentication(ApiKeySchemeConstants.SchemeName)
     .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeySchemeConstants.SchemeName, _ => {});
@@ -57,7 +57,7 @@ app.MapGet("/users/{username}", async (string username, IUserService userService
 });
 
 app.MapPost("/users",
-    [Authorize(AuthenticationSchemes = ApiKeySchemeConstants.SchemeName)]
+    //[Authorize(AuthenticationSchemes = ApiKeySchemeConstants.SchemeName)]
     async (User user, IUserService userService, IValidator<User> validator) =>
 {
     var validationResult = await validator.ValidateAsync(user);
