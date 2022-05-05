@@ -12,14 +12,4 @@ public static class DtoExtensions
             Email = user.Email
         };
     }
-
-    public static User AsUser(this UserDto userDto)
-    {
-        return new User
-        {
-            Username = userDto.Username,
-            Email = userDto.Email
-        };
-    }
-
 }
