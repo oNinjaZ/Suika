@@ -455,3 +455,4 @@ $RECYCLE.BIN/
 !.vscode/extensions.json
 
 Suika.Api/suikaTest.db
+Suika.Api/appsettings.Local.json

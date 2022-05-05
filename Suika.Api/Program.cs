@@ -1,11 +1,20 @@
+using System.Net;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
+using Suika.Api.Auth;
 using Suika.Api.Data;
 using Suika.Api.Extensions;
 using Suika.Api.Models;
 using Suika.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
+
+builder.Services.AddAuthentication(ApiKeySchemeConstants.SchemeName)
+    .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeySchemeConstants.SchemeName, _ => {});
+builder.Services.AddAuthorization();  
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -16,9 +25,15 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFac
 ));
 builder.Services.AddSingleton<DatabaseInitializer>();
 
-
-
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World!");
 
@@ -41,7 +56,9 @@ app.MapGet("/users/{username}", async (string username, IUserService userService
     return user is not null ? Results.Ok(user.AsDto()) : Results.NotFound();
 });
 
-app.MapPost("/users", async (User user, IUserService userService, IValidator<User> validator) =>
+app.MapPost("/users",
+    [Authorize(AuthenticationSchemes = ApiKeySchemeConstants.SchemeName)]
+    async (User user, IUserService userService, IValidator<User> validator) =>
 {
     var validationResult = await validator.ValidateAsync(user);
     if (!validationResult.IsValid)
@@ -56,7 +73,6 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
             new ("Username", "This username already exists")
         });
     }
-
     return Results.Created($"/users/{user.Username}", user.AsDto());
 });
 
@@ -71,16 +87,12 @@ app.MapPut("/users/{username}", async (string username, User user, IUserService 
     }
     var updated = await userService.UpdateAsync(user);
     return (updated) ? Results.NoContent() : Results.NotFound();
-
 });
 
-if (app.Environment.IsDevelopment())
+app.MapDelete("/users/{username}", async (string username, IUserService userService) =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
-
+    return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
+});
 
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
 await databaseInitializer.InitializeAsync();
