@@ -31,8 +31,7 @@ public class UserService : IUserService
     {
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
-            @"DELETE From Users
-            WHERE Username = @Username",
+            @"DELETE From Users WHERE Username = @Username",
             new { Username = username });
         return result > 0;
 
