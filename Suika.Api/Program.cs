@@ -16,8 +16,6 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFac
 ));
 builder.Services.AddSingleton<DatabaseInitializer>();
 
-
-
 var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
@@ -56,7 +54,6 @@ app.MapPost("/users", async (User user, IUserService userService, IValidator<Use
             new ("Username", "This username already exists")
         });
     }
-
     return Results.Created($"/users/{user.Username}", user.AsDto());
 });
 
@@ -71,7 +68,11 @@ app.MapPut("/users/{username}", async (string username, User user, IUserService 
     }
     var updated = await userService.UpdateAsync(user);
     return (updated) ? Results.NoContent() : Results.NotFound();
+});
 
+app.MapDelete("/users/{username}", async (string username, IUserService userService) =>
+{
+    return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
 });
 
 if (app.Environment.IsDevelopment())
@@ -79,8 +80,6 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
-
-
 
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
 await databaseInitializer.InitializeAsync();
