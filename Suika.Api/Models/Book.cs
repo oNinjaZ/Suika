@@ -2,8 +2,8 @@ namespace Suika.Api.Models;
 
 public class Book
 {
-    public Guid Id { get; set; }
+    public int BookId { get; set; }
     public string Title { get; set; } = default!;
-    public DateTime CompletionDate { get; set; }
     public int PageCount { get; set; }
+    public DateTime ReleaseDate { get; set; }
 }
