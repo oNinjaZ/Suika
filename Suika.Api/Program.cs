@@ -1,5 +1,6 @@
 using FluentValidation;
 using FluentValidation.Results;
+using Suika.Api.Auth;
 using Suika.Api.Data;
 using Suika.Api.Extensions;
 using Suika.Api.Models;
@@ -8,6 +9,10 @@ using Suika.Api.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
+
+builder.Services.AddAuthentication(ApiKeySchemeConstants.SchemeName)
+    .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeySchemeConstants.SchemeName, _ => {});
+builder.Services.AddAuthorization();  
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -19,6 +24,14 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFac
 builder.Services.AddSingleton<DatabaseInitializer>();
 
 var app = builder.Build();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
+
+app.UseAuthorization();
 
 app.MapGet("/", () => "Hello World!");
 
@@ -76,12 +89,6 @@ app.MapDelete("/users/{username}", async (string username, IUserService userServ
 {
     return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
 });
-
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
 
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
 await databaseInitializer.InitializeAsync();
