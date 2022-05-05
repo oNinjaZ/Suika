@@ -1,5 +1,7 @@
+using System.Net;
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Authorization;
 using Suika.Api.Auth;
 using Suika.Api.Data;
 using Suika.Api.Extensions;
@@ -54,7 +56,9 @@ app.MapGet("/users/{username}", async (string username, IUserService userService
     return user is not null ? Results.Ok(user.AsDto()) : Results.NotFound();
 });
 
-app.MapPost("/users", async (User user, IUserService userService, IValidator<User> validator) =>
+app.MapPost("/users",
+    [Authorize(AuthenticationSchemes = ApiKeySchemeConstants.SchemeName)]
+    async (User user, IUserService userService, IValidator<User> validator) =>
 {
     var validationResult = await validator.ValidateAsync(user);
     if (!validationResult.IsValid)
