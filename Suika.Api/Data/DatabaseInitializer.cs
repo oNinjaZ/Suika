@@ -22,11 +22,16 @@ public class DatabaseInitializer
                 RegistrationDate TEXT NOT NULL);
             
             CREATE TABLE IF NOT EXISTS Books(
-                Id TEXT NOT NULL PRIMARY KEY,
+                BookId INTEGER NOT NULL PRIMARY KEY,
                 Title TEXT NOT NULL,
                 PageCount INTEGER,
-                CompletionDate TEXT NOT NULL);");
-
+                ReleaseDate TEXT);
             
+            CREATE TABLE IF NOT EXISTS UserBooks(
+                UserBooksId INTEGER NOT NULL PRIMARY KEY,
+                Status INTEGER NOT NULL,
+                UserId INTEGER NOT NULL,
+                FOREIGN KEY (UserId) REFERENCES Users(UserId));");
+
     }
 }
