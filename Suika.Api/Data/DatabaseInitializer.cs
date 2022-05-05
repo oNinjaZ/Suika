@@ -16,23 +16,16 @@ public class DatabaseInitializer
         var connection = await _connectionFactory.CreateConnectionAsync();
         await connection.ExecuteAsync(@"
             CREATE TABLE IF NOT EXISTS Users(
-                Username TEXT NOT NULL PRIMARY KEY,
-                Email TEXT NOT NULL,
+                UserId INTEGER PRIMARY KEY NOT NULL,
+                Username TEXT NOT NULL,
+                Email TEXT,
                 RegistrationDate TEXT NOT NULL);
             
             CREATE TABLE IF NOT EXISTS Books(
                 Id TEXT NOT NULL PRIMARY KEY,
                 Title TEXT NOT NULL,
                 PageCount INTEGER,
-                CompletionDate TEXT NOT NULL);
-
-            CREATE TABLE UserBooks(
-                Id TEXT PRIMARY KEY,
-                Status INTEGER NOT NULL,
-                CompletionDate TEXT,
-                Username TEXT FOREIGN KEY REFERENCES Users(Username),
-                BookId TEXT FOREIGN KEY REFERENCES Books(Id))
-                ");
+                CompletionDate TEXT NOT NULL);");
 
             
     }
