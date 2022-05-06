@@ -13,13 +13,18 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
 
 builder.Services.AddAuthentication(ApiKeySchemeConstants.SchemeName)
-    .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeySchemeConstants.SchemeName, _ => {});
-builder.Services.AddAuthorization();  
+    .AddScheme<ApiKeyAuthSchemeOptions, ApiKeyAuthHandler>(ApiKeySchemeConstants.SchemeName, _ => { });
+builder.Services.AddAuthorization();
+
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddSingleton<IBookService, BookService>();
 builder.Services.AddSingleton<IUserService, UserService>();
+
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
 builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFactory(
     builder.Configuration.GetValue<string>("Database:ConnectionString")
 ));
@@ -35,8 +40,20 @@ if (app.Environment.IsDevelopment())
 
 app.UseAuthorization();
 
-app.MapGet("/", () => "Hello World!");
+app.MapPost("/books", async (Book book, IBookService bookService) =>
+{
+    //todo add validator
 
+    var created = await bookService.CreateAsync(book);
+    if (!created)
+    {
+        return Results.BadRequest(); // todo return validation error
+    }
+
+    return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
+});
+
+#region User endpoints
 app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
 {
     if (searchTerm is not null && !string.IsNullOrWhiteSpace(searchTerm))
@@ -93,7 +110,11 @@ app.MapDelete("/users/{username}", async (string username, IUserService userServ
 {
     return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
 });
+#endregion
 
+#region Book endpoints
+
+#endregion
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
 await databaseInitializer.InitializeAsync();
 
