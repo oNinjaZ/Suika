@@ -6,4 +6,5 @@ public class Book
     public string Title { get; set; } = default!;
     public string Type { get; set; } = default!;
     public int PageCount { get; set; }
+    public DateTime ReleaseDate { get; set; }
 }

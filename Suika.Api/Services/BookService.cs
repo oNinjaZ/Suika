@@ -13,8 +13,19 @@ public class BookService : IBookService
         _connectionFactory = connectionFactory;
     }
 
-    public Task<bool> Create(Book book)
+    public async Task<bool> CreateAsync(Book book)
     {
-        throw new NotImplementedException();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        var result = await connection.ExecuteAsync(
+            @"INSERT INTO Books(Title, Type, PageCount, ReleaseDate)
+            VALUES (@Title, @Type, @PageCount, @ReleaseDate)", book);
+        return result > 0;
+    }
+
+    public async Task<IEnumerable<Book>> GetAllAsync()
+    {
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<Book>(
+            @"SELECT * FROM Books");
     }
 }

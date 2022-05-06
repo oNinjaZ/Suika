@@ -4,5 +4,6 @@ namespace Suika.Api.Services;
 
 public interface IBookService
 {
-    public Task<bool> Create(Book book);
+    public Task<bool> CreateAsync(Book book);
+    public Task<IEnumerable<Book>> GetAllAsync();
 }

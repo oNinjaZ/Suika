@@ -39,13 +39,13 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<User>> GetAllAsync()
     {
-        var connection = await _connectionFactory.CreateConnectionAsync();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
         return await connection.QueryAsync<User>(@"SELECT * FROM Users");
     }
 
     public async Task<User?> GetByUsernameAsync(string username)
     {
-        var connection = await _connectionFactory.CreateConnectionAsync();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
         return await connection.QuerySingleOrDefaultAsync<User>(
             @"SELECT * FROM Users
             WHERE Username = @Username",
@@ -54,7 +54,7 @@ public class UserService : IUserService
 
     public async Task<IEnumerable<User>> SearchByUsernameAsync(string searchTerm)
     {
-        var connection = await _connectionFactory.CreateConnectionAsync();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
         return await connection.QueryAsync<User>(
             @"SELECT * FROM Users
             WHERE Username LIKE '%' || @SearchTerm || '%'",
@@ -65,7 +65,7 @@ public class UserService : IUserService
     public async Task<bool> UpdateAsync(User user)
     {
 
-        var connection = await _connectionFactory.CreateConnectionAsync();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             @"UPDATE Users
             SET Email = @Email

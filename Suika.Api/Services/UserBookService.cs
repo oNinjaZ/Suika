@@ -13,16 +13,16 @@ public class UserBookService : IUserBookService
         _connectionFactory = connectionFactory;
     }
 
-    public async Task<bool> Create(UserBook userBook)
+    public async Task<bool> CreateAsync(UserBook userBook)
     {
-        var connection = await _connectionFactory.CreateConnectionAsync();
-        var result = await connection.ExecuteAsync(@"
-
-        ");
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        var result = await connection.ExecuteAsync(
+            @"INSERT INTO UserBooks(Status, UserId, BookId)
+            VALUES(@Status, @UserId, @BookId)", userBook);
         return result > 0;
     }
 
-    public Task<IEnumerable<UserBook>> GetAll()
+    public Task<IEnumerable<UserBook>> GetAllAsync()
     {
         throw new NotImplementedException();
     }

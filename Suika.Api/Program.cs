@@ -22,6 +22,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddSingleton<IBookService, BookService>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IUserBookService, UserBookService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -39,19 +40,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
-app.MapPost("/books", async (Book book, IBookService bookService) =>
-{
-    //todo add validator
-
-    var created = await bookService.CreateAsync(book);
-    if (!created)
-    {
-        return Results.BadRequest(); // todo return validation error
-    }
-
-    return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
-});
 
 #region User endpoints
 app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
@@ -113,6 +101,27 @@ app.MapDelete("/users/{username}", async (string username, IUserService userServ
 #endregion
 
 #region Book endpoints
+app.MapPost("/books", async (Book book, IBookService bookService) =>
+{
+    //todo add validator
+
+    var created = await bookService.CreateAsync(book);
+    if (!created)
+    {
+        return Results.BadRequest(); // todo return validation error
+    }
+
+    return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
+});
+#endregion
+
+#region UserBook endpoints 
+app.MapPost("/userbook", async (UserBook userBook, IUserBookService userBookService) =>
+{
+    var created = await userBookService.CreateAsync(userBook);
+    if (!created) return Results.BadRequest();
+    return Results.Ok();
+});
 
 #endregion
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
