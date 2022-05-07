@@ -22,9 +22,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IBookService, BookService>();
-builder.Services.AddSingleton<IUserService, UserService>();
-builder.Services.AddSingleton<IUserBookService, UserBookService>();
+builder.Services.AddSingleton<IBookService, BookService>()
+    .AddSingleton<IUserService, UserService>()
+    .AddSingleton<IUserBookService, UserBookService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
@@ -137,8 +137,8 @@ app.MapGet("/{username}/books", async (string username, IUserBookService userBoo
     var userBooks = await userBookService.GetAllAsync(username);
     return Results.Ok(userBooks);
 });
-
 #endregion
+
 var databaseInitializer = app.Services.GetRequiredService<DatabaseInitializer>();
 await databaseInitializer.InitializeAsync();
 
