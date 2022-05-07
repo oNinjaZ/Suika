@@ -32,7 +32,7 @@ public class DatabaseInitializer
 
             CREATE TABLE IF NOT EXISTS UserBooks(
                 UserBooksId INTEGER PRIMARY KEY,
-                Status INTEGER NOT NULL,
+                Status TEXT NOT NULL,
                 UserId INTEGER NOT NULL,
                 BookId INTEGER NOT NULL,
                 FOREIGN KEY (UserId) REFERENCES Users(UserId),
