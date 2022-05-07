@@ -2,12 +2,14 @@ using System.Net;
 using FluentValidation;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Suika.Api.Auth;
 using Suika.Api.Data;
 using Suika.Api.Extensions;
 using Suika.Api.Models;
 using Suika.Api.Services;
 
+#region Services
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.Configuration.AddJsonFile("appsettings.Local.json", true, true);
@@ -30,6 +32,7 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFac
     builder.Configuration.GetValue<string>("Database:ConnectionString")
 ));
 builder.Services.AddSingleton<DatabaseInitializer>();
+#endregion
 
 var app = builder.Build();
 
@@ -113,14 +116,26 @@ app.MapPost("/books", async (Book book, IBookService bookService) =>
 
     return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
 });
+
+app.MapGet("/books", async (IBookService bookService) =>
+{
+    var books = await bookService.GetAllAsync();
+    return Results.Ok(books);
+});
 #endregion
 
-#region UserBook endpoints 
-app.MapPost("/userbook", async (UserBook userBook, IUserBookService userBookService) =>
+#region UserBooks endpoints 
+app.MapPost("/{username}/books", async (string username, UserBook userBook, IUserBookService userBookService) =>
 {
     var created = await userBookService.CreateAsync(userBook);
     if (!created) return Results.BadRequest();
     return Results.Ok();
+});
+
+app.MapGet("/{username}/books", async (string username, IUserBookService userBookService) =>
+{
+    var userBooks = await userBookService.GetAllAsync(username);
+    return Results.Ok(userBooks);
 });
 
 #endregion

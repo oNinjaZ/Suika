@@ -22,8 +22,16 @@ public class UserBookService : IUserBookService
         return result > 0;
     }
 
-    public Task<IEnumerable<UserBook>> GetAllAsync()
+    public async Task<IEnumerable<object>> GetAllAsync(string username)
     {
-        throw new NotImplementedException();
+        using var connection = await _connectionFactory.CreateConnectionAsync();
+        return await connection.QueryAsync<object>(
+            @"SELECT
+                Books.Title AS title,
+                UserBooks.Status AS status
+            FROM Users
+                INNER JOIN UserBooks ON UserBooks.UserId = Users.UserId
+                INNER JOIN Books ON Books.BookId = UserBooks.BookId
+            WHERE Username = @Username", new { Username = username });
     }
 }

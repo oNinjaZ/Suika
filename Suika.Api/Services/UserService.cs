@@ -17,14 +17,12 @@ public class UserService : IUserService
     {
         var existingUser = await GetByUsernameAsync(user.Username);
         if (existingUser is not null) return false;
-
         using var connection = await _connectionFactory.CreateConnectionAsync();
         var result = await connection.ExecuteAsync(
             @"INSERT INTO Users(Username, Email, RegistrationDate)
             VALUES (@Username, @Email, @RegistrationDate)",
             user);
         return result > 0;
-
     }
 
     public async Task<bool> DeleteAsync(string username)
@@ -34,7 +32,6 @@ public class UserService : IUserService
             @"DELETE From Users WHERE Username = @Username",
             new { Username = username });
         return result > 0;
-
     }
 
     public async Task<IEnumerable<User>> GetAllAsync()
