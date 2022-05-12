@@ -45,7 +45,7 @@ public class UserService : IUserService
         using var connection = await _connectionFactory.CreateConnectionAsync();
         return await connection.QuerySingleOrDefaultAsync<User>(
             @"SELECT * FROM Users
-            WHERE Username = @Username",
+            WHERE UPPER(Username) = UPPER(@Username)",
             new { Username = username });
     }
 
