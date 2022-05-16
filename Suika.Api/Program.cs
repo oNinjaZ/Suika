@@ -56,13 +56,13 @@ app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
     var users = await userService.GetAllAsync();
     var usersAsDtos = users.Select(user => user.AsDto());
     return Results.Ok(usersAsDtos);
-});
+}).WithName("GetUsers");
 
 app.MapGet("/users/{username}", async (string username, IUserService userService) =>
 {
     var user = await userService.GetByUsernameAsync(username);
     return user is not null ? Results.Ok(user.AsDto()) : Results.NotFound();
-});
+}).WithName("GetUser");
 
 app.MapPost("/users",
     //[Authorize(AuthenticationSchemes = ApiKeySchemeConstants.SchemeName)]
@@ -71,17 +71,24 @@ app.MapPost("/users",
     var validationResult = await validator.ValidateAsync(user);
     if (!validationResult.IsValid)
     {
-        return Results.BadRequest(validationResult.Errors);
+        return Results.BadRequest(validationResult.Errors.Select(e => new {
+            propertyName = e.PropertyName,
+            errorMessage = e.ErrorMessage
+        }));
     }
     var created = await userService.CreateAsync(user);
     if (!created)
     {
-        return Results.BadRequest(new List<ValidationFailure>
+        return Results.BadRequest(new
         {
-            new ("Username", "This username already exists")
+            propertyName = "Username",
+            errorMessage = "This username already exists."
         });
     }
-    return Results.Created($"/users/{user.Username}", user.AsDto());
+    
+    //var locationUri = linker.GetUriByName(context, "GetUser", new { username = user.Username })!;
+    //return Results.Created(locationUri, user.AsDto());
+    return Results.CreatedAtRoute("GetUser", new {username = user.Username}, user.AsDto());
 });
 
 app.MapPut("/users/{username}", async (string username, User user, IUserService userService,
@@ -128,7 +135,7 @@ app.MapGet("/books", async (IBookService bookService) =>
 app.MapPost("/{username}/books", async (string username, UserBook userBook, IUserService userService, IUserBookService userBookService) =>
 {
     var existingUser = await userService.GetByUsernameAsync(username);
-    if(existingUser is null) return Results.BadRequest("User not found");
+    if (existingUser is null) return Results.BadRequest("User not found");
 
     userBook.UserId = existingUser.UserId;
     var created = await userBookService.CreateAsync(userBook);
