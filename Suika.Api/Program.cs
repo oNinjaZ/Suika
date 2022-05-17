@@ -23,8 +23,8 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IBookService, BookService>();
 builder.Services.AddUserEndpoints();
+builder.Services.AddBookEndpoints();
 builder.Services.AddSingleton<IUserBookService, UserBookService>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -46,27 +46,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthorization();
 
 app.UseUserEndpoints();
-
-#region Book endpoints
-app.MapPost("/books", async (Book book, IBookService bookService) =>
-{
-    //todo add validator
-
-    var created = await bookService.CreateAsync(book);
-    if (!created)
-    {
-        return Results.BadRequest(); // todo return validation error
-    }
-
-    return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
-});
-
-app.MapGet("/books", async (IBookService bookService) =>
-{
-    var books = await bookService.GetAllAsync();
-    return Results.Ok(books);
-});
-#endregion
+app.UseBookEndpoints();
 
 #region UserBooks endpoints 
 app.MapPost("/{username}/books", async (string username, UserBook userBook, IUserService userService, IUserBookService userBookService) =>

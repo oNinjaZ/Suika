@@ -15,17 +15,17 @@ public static class UserEndpoints
     public static void UseUserEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
-{
-    if (searchTerm is not null && !string.IsNullOrWhiteSpace(searchTerm))
-    {
-        var matchedUsers = await userService.SearchByUsernameAsync(searchTerm);
-        var matchedUsersAsDtos = matchedUsers.Select(user => user.AsDto());
-        return Results.Ok(matchedUsersAsDtos);
-    }
-    var users = await userService.GetAllAsync();
-    var usersAsDtos = users.Select(user => user.AsDto());
-    return Results.Ok(usersAsDtos);
-}).WithName("GetUsers");
+        {
+            if (searchTerm is not null && !string.IsNullOrWhiteSpace(searchTerm))
+            {
+                var matchedUsers = await userService.SearchByUsernameAsync(searchTerm);
+                var matchedUsersAsDtos = matchedUsers.Select(user => user.AsDto());
+                return Results.Ok(matchedUsersAsDtos);
+            }
+            var users = await userService.GetAllAsync();
+            var usersAsDtos = users.Select(user => user.AsDto());
+            return Results.Ok(usersAsDtos);
+        }).WithName("GetUsers");
 
         app.MapGet("/users/{username}", async (string username, IUserService userService) =>
         {
@@ -56,8 +56,8 @@ public static class UserEndpoints
                 });
             }
 
-    //var locationUri = linker.GetUriByName(context, "GetUser", new { username = user.Username })!;
-    //return Results.Created(locationUri, user.AsDto());
+            //var locationUri = linker.GetUriByName(context, "GetUser", new { username = user.Username })!;
+            //return Results.Created(locationUri, user.AsDto());
             return Results.CreatedAtRoute("GetUser", new { username = user.Username }, user.AsDto());
         });
 
@@ -79,5 +79,4 @@ public static class UserEndpoints
             return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
         });
     }
-
 }
