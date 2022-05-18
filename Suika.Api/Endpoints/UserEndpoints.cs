@@ -7,12 +7,13 @@ namespace Suika.Api.Endpoints;
 
 public static class UserEndpoints
 {
-    public static void AddUserEndpoints(this IServiceCollection services)
+    public static IServiceCollection AddUserEndpoints(this IServiceCollection services)
     {
         services.AddSingleton<IUserService, UserService>();
+        return services;
     }
 
-    public static void UseUserEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder UseUserEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapGet("/users", async (IUserService userService, string? searchTerm) =>
         {
@@ -78,5 +79,7 @@ public static class UserEndpoints
         {
             return await userService.DeleteAsync(username) ? Results.NoContent() : Results.NotFound();
         });
+
+        return app;
     }
 }

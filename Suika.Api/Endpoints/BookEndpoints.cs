@@ -5,12 +5,13 @@ namespace Suika.Api.Endpoints;
 
 public static class BookEndpoints
 {
-    public static void AddBookEndpoints(this IServiceCollection services)
+    public static IServiceCollection AddBookEndpoints(this IServiceCollection services)
     {
         services.AddSingleton<IBookService, BookService>();
+        return services;
     }
 
-    public static void UseBookEndpoints(this IEndpointRouteBuilder app)
+    public static IEndpointRouteBuilder UseBookEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/books", async (Book book, IBookService bookService) =>
         {
@@ -30,5 +31,7 @@ public static class BookEndpoints
             var books = await bookService.GetAllAsync();
             return Results.Ok(books);
         });
+
+        return app;
     }
 }
