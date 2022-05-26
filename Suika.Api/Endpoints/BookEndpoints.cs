@@ -13,25 +13,30 @@ public static class BookEndpoints
 
     public static IEndpointRouteBuilder UseBookEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/books", async (Book book, IBookService bookService) =>
-        {
-            //todo add validator
+        app.MapPost("/books", CreateBookAsync)
+            .WithName("CreateBook")
+            .Accepts<Book>("application/json");
 
-            var created = await bookService.CreateAsync(book);
-            if (!created)
-            {
-                return Results.BadRequest(); // todo return validation error
-            }
-
-            return Results.Ok(); //todo change to Results.Created() after mapping Get(single book) endpoint
-        });
-
-        app.MapGet("/books", async (IBookService bookService) =>
-        {
-            var books = await bookService.GetAllAsync();
-            return Results.Ok(books);
-        });
+        app.MapGet("/books", GetBookAsync)
+            .WithName("GetAllBooks");
 
         return app;
+    }
+
+    internal static async Task<IResult> GetBookAsync(IBookService bookService)
+    {
+        var books = await bookService.GetAllAsync();
+        return Results.Ok(books);
+    }
+
+    internal static async Task<IResult> CreateBookAsync(Book book, IBookService bookService)
+    {
+        var created = await bookService.CreateAsync(book);
+        if (!created)
+        {
+            return Results.BadRequest(); // todo return validation error
+        }
+
+        return Results.Ok();
     }
 }
