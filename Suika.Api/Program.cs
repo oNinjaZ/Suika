@@ -1,14 +1,8 @@
-using System.Net;
 using FluentValidation;
-using FluentValidation.Results;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
 using Suika.Api.Auth;
 using Suika.Api.Data;
 using Suika.Api.Endpoints;
-using Suika.Api.Extensions;
-using Suika.Api.Models;
-using Suika.Api.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +27,6 @@ builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqliteConnectionFac
     builder.Configuration.GetValue<string>("Database:ConnectionString")
 ));
 builder.Services.AddSingleton<DatabaseInitializer>();
-
 
 var app = builder.Build();
 
